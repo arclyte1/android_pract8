@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">pract8</string>
+    <string name="text">Text</string>
+    <string name="share_text">share text</string>
+    <string name="share_image">share image</string>
+    <string name="select_image">select image</string>
+</resources>
