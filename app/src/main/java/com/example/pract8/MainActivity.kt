@@ -20,12 +20,14 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import com.example.pract8.databinding.ActivityMainBinding
+import pl.droidsonroids.gif.GifDrawable
 import java.io.File
 
 class MainActivity : AppCompatActivity(), NfcAdapter.CreateNdefMessageCallback {
     private lateinit var binding: ActivityMainBinding
     private lateinit var imageUri: Uri
     private lateinit var nfcAdapter: NfcAdapter
+    private lateinit var gif: GifDrawable
 
     private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -37,7 +39,16 @@ class MainActivity : AppCompatActivity(), NfcAdapter.CreateNdefMessageCallback {
             cursor?.moveToFirst()
             val text = "Имя файла: ${cursor?.getString(nameIndex!!).toString()}\nТип: ${contentResolver.getType(imageUri)}\nРазмер: ${cursor?.getLong(sizeIndex!!).toString()} байт"
             binding.imageData.text = text
-            binding.gifView.setImageURI(Uri.parse(data.toString()))
+            if (contentResolver.getType(imageUri) == "image/gif") {
+                binding.plus10.visibility = View.VISIBLE
+                binding.plus60.visibility = View.VISIBLE
+                gif = GifDrawable(contentResolver, imageUri)
+                binding.gifView.setImageDrawable(gif)
+            } else {
+                binding.plus10.visibility = View.INVISIBLE
+                binding.plus60.visibility = View.INVISIBLE
+                binding.gifView.setImageURI(Uri.parse(data.toString()))
+            }
         }
     }
 
@@ -83,6 +94,20 @@ class MainActivity : AppCompatActivity(), NfcAdapter.CreateNdefMessageCallback {
         if (packageManager.hasSystemFeature(PackageManager.FEATURE_NFC)) {
             nfcAdapter = NfcAdapter.getDefaultAdapter(this)
             nfcAdapter?.setNdefPushMessageCallback(this, this)
+        }
+
+        binding.plus10.visibility = View.INVISIBLE
+        binding.plus10.setOnClickListener {
+            if (this::gif.isInitialized) {
+                gif.seekTo(gif.currentPosition + 10_000)
+            }
+        }
+
+        binding.plus60.visibility = View.INVISIBLE
+        binding.plus60.setOnClickListener {
+            if (this::gif.isInitialized) {
+                gif.seekTo(gif.currentPosition + 60_000)
+            }
         }
     }
 
